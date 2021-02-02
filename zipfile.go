@@ -23,9 +23,7 @@
 package zipfs
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"path/filepath"
 
@@ -47,22 +45,6 @@ func (f *File) Close() (err error) {
 // Read reads bytes into the passed buffer.
 func (f *File) Read(p []byte) (n int, err error) {
 	return f.internal.Read(p)
-}
-
-// ReadAt reads bytes starting at off into passed buffer.
-func (f *File) ReadAt(p []byte, off int64) (n int, err error) {
-	if readerAt, ok := f.internal.(io.ReaderAt); ok {
-		return readerAt.ReadAt(p, off)
-	}
-	return 0, errors.New("does not implement ReadAt")
-}
-
-// Seek move the current offset to the given position.
-func (f *File) Seek(offset int64, whence int) (int64, error) {
-	if readerAt, ok := f.internal.(io.Seeker); ok {
-		return readerAt.Seek(offset, whence)
-	}
-	return 0, errors.New("does not implement Seek")
 }
 
 // Name returns the name of the file.

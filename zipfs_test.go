@@ -26,9 +26,10 @@ import (
 	"bytes"
 	"io/fs"
 	"testing"
+	"testing/fstest"
 
 	"github.com/forensicanalysis/fslib/fsio"
-	"github.com/forensicanalysis/fslib/fstest"
+	fslibtest "github.com/forensicanalysis/fslib/fstest"
 )
 
 func TestNewReadZipFs(t *testing.T) {
@@ -48,19 +49,27 @@ func TestNewReadZipFs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := New(tt.args.file)
+			fsys, err := New(tt.args.file)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("NewReadZipFs() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if err != nil {
 				return
+			}
+
+			err = fstest.TestFS(fsys, "file.txt")
+			if err != nil {
+				t.Error(err)
 			}
 		})
 	}
 }
 
 func Test_ZIP(t *testing.T) {
-	tests := fstest.GetDefaultContainerTests()
+	tests := fslibtest.GetDefaultContainerTests()
 
 	tests["rootTest"].InfoMode = fs.ModeDir
 
-	fstest.RunTest(t, "ZIP", "zipfs/testdata/zip.zip", func(f fsio.ReadSeekerAt) (fs.FS, error) { return New(f) }, tests)
+	fslibtest.RunTest(t, "ZIP", "zipfs/testdata/zip.zip", func(f fsio.ReadSeekerAt) (fs.FS, error) { return New(f) }, tests)
 }
